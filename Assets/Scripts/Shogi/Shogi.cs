@@ -453,7 +453,28 @@ namespace Assets.Scripts.Shogi
             
             return Move.NONE;
         }
-        
+
+        public static Move ToMove(string strMove)
+        {
+            if (strMove.Length <= 3)
+                return Move.NONE;
+
+            bool promote = strMove.Length == 5 && strMove[4] == '+';
+            bool drop = strMove[1] == '*';
+            var to = MakeSquare(strMove[2], strMove[3]);
+
+            if (drop)
+            {
+                var pr = MakePiece(strMove[0]);
+                return MakeMoveDrop(pr, to);
+            }
+            else
+            {
+                var from = MakeSquare(strMove[0], strMove[1]);
+                return promote ? MakeMovePromote(from, to) : MakeMove(from, to);
+            }
+        }
+
         public static bool CanPromote(Color c, Rank r) { return r == (c == Color.BLACK ? Rank.RANK_1 : Rank.RANK_5); }
         public static bool CanPromote(Color c, Square sq) { return CanPromote(c, sq.ToRank()); }
         public static SquareHand MakeSquareHand(Color c, Piece pr)
