@@ -1,22 +1,19 @@
 ﻿using Assets.Scripts.Shogi;
 
-namespace Assets.Scripts.GameServer
-{
-    public class MouseControl
-    {
+namespace Assets.Scripts.GameServer {
+    public class MouseControl {
         // 盤面の状態
-        public ScreenStateEnum state;
+        public MouseStateEnum State;
 
         // マウスの入力先
-        public SquareHand pickedFrom;
-        public SquareHand pickedTo;
+        public SquareHand PickedFrom;
+        public SquareHand PickedTo;
 
         // ダイアログの選択
-        public PromoteDialogSelectEnum select;
+        public PromoteDialogSelectEnum Select;
     };
 
-    public enum ScreenStateEnum
-    {
+    public enum MouseStateEnum {
         // 何もつかんでいない
         None,
 
@@ -27,8 +24,7 @@ namespace Assets.Scripts.GameServer
         PromoteDialog,
     };
 
-    public enum PromoteDialogSelectEnum
-    {
+    public enum PromoteDialogSelectEnum {
         None,
         Promote,
         NonPromote,

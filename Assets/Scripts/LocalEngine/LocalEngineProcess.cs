@@ -1,10 +1,8 @@
 ﻿using System.Diagnostics;
 using Assets.Scripts.Shogi;
 
-namespace Assets.Scripts.LocalEngineManager
-{
-    public class LocalEngineProcess
-    {
+namespace Assets.Scripts.LocalEngine {
+    public class LocalEngineProcess {
         private Process Process { get; set; } = null;
 
         public Move BestMove { get; set; } = Move.NONE;
@@ -13,8 +11,7 @@ namespace Assets.Scripts.LocalEngineManager
 
         public bool ReadyOk { get; private set; } = false;
 
-        public void RunEngine(string path)
-        {
+        public void RunEngine(string path) {
             var psi = new ProcessStartInfo();
             UnityEngine.Debug.Log(path);
 
@@ -42,41 +39,50 @@ namespace Assets.Scripts.LocalEngineManager
             Thinking = false;
             Process.StandardInput.WriteLine("usi");
         }
-        
-        private void OutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
+
+        public void QuitEngine() {
+            if (Process == null)
+                return;
+
+            // 標準出力・標準エラーの非同期読み込みを終了する
+            Process.CancelOutputRead();
+            Process.CancelErrorRead();
+
+            Process.StandardInput.WriteLine("stop");
+            Process.StandardInput.WriteLine("quit");
+            Process = null;
+        }
+
+        private void OutputDataReceived(object sender, DataReceivedEventArgs e) {
             if (Process == null || string.IsNullOrEmpty(e.Data))
                 return;
 
             string[] cmd = e.Data.Split(' ');
-            switch (cmd[0])
-            {
-                case "usiok":
-                    Process.StandardInput.WriteLine("isready");
-                    break;
+            switch (cmd[0]) {
+            case "usiok":
+                Process.StandardInput.WriteLine("isready");
+                break;
 
-                case "readyok":
-                    Process.StandardInput.WriteLine("usinewgame");
-                    ReadyOk = true;
-                    break;
+            case "readyok":
+                Process.StandardInput.WriteLine("usinewgame");
+                ReadyOk = true;
+                break;
 
-                case "bestmove":
-                    UnityEngine.Debug.Log(e.Data);
-                    BestMove = Util.ToMove(cmd[1]);
-                    break;
+            case "bestmove":
+                UnityEngine.Debug.Log(e.Data);
+                BestMove = Util.ToMove(cmd[1]);
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
 
-        private void ErrorDataReceived(object sender, DataReceivedEventArgs e)
-        {
+        private void ErrorDataReceived(object sender, DataReceivedEventArgs e) {
             throw new System.NotImplementedException();
         }
 
-        public void Think(string positionCommand)
-        {
+        public void Think(string positionCommand) {
             if (Process == null || Thinking)
                 return;
 

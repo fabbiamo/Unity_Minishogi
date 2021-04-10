@@ -1,119 +1,136 @@
-﻿using Assets.Scripts.LocalEngineManager;
+﻿using Assets.Scripts.LocalEngine;
 using Assets.Scripts.Shogi;
 using Photon.Pun;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using SColor = Assets.Scripts.Shogi.Color;
 
-namespace Assets.Scripts.GameServer
-{
-    public class GameServer : MonoBehaviourPunCallbacks
-    {
+namespace Assets.Scripts.GameServer {
+    public class GameServer : MonoBehaviourPunCallbacks {
         [SerializeField]
         GameObject GUIObject = default;
 
         [SerializeField]
-        Camera SceneCamera = default;
+        GameObject ResultPanel = default;
 
-        SColor MyColor { set; get; } = SColor.NB;
+        [SerializeField]
+        Camera SceneCamera = default;
 
         GUIManager GUIManager { set; get; }
 
         public static bool IsOnline { get { return PhotonNetwork.InRoom; } }
 
-        LocalEngineProcess localEngineProcess = null;
+        LocalEngineProcess LocalEngineProcess = null;
 
-        bool isWin;
-        double myRating, opponentRating;
+        bool IsWin;
+        double MyRating, OpponentRating;
 
-        void Awake()
-        {
+        void Awake() {
             GUIManager = GUIObject.GetComponent<GUIManager>();
         }
 
-        void Start()
-        {
-            var us =
-                !IsOnline ? SColor.NB :
-                PhotonNetwork.IsMasterClient ? SColor.BLACK : SColor.WHITE;
+        void Start() {
+            var us = !IsOnline ? SColor.NB
+                     : PhotonNetwork.IsMasterClient ? SColor.BLACK
+                     : SColor.WHITE;
 
-            if (IsOnline)
-            {
-                foreach (var player in PhotonNetwork.PlayerList)
-                {
+            if (IsOnline) {
+                foreach (var player in PhotonNetwork.PlayerList) {
                     if (player.IsLocal)
-                        myRating = (double)player.CustomProperties["Rating"];
+                        MyRating = (double)player.CustomProperties["Rating"];
                     else
-                        opponentRating = (double)player.CustomProperties["Rating"];
+                        OpponentRating = (double)player.CustomProperties["Rating"];
                 }
             }
 
             StartGame(us);
         }
 
-        void Update()
-        {
-            if (localEngineProcess == null || GUIManager.SideToMove == MyColor)
-                return;
+        void Update() {
 
-            if (localEngineProcess.ReadyOk && !localEngineProcess.Thinking)
-            {
-                Think();
-                while (localEngineProcess.BestMove == Move.NONE) ;
-                DoMove(localEngineProcess.BestMove);
+            if (IsOnline) {
+                if (GUIManager.Winner != SColor.NB) {
+                    //LeaveRoom(GUIManager.Winner == GUIManager.MyColor);
+                    IsWin = GUIManager.Winner == GUIManager.MyColor;
+                    SetResultPanel();
+                }
 
-                localEngineProcess.BestMove = Move.NONE;
-                localEngineProcess.Thinking = false;
+                if (PhotonNetwork.PlayerList.Length < 2) {
+                    //LeaveRoom(true); // 接続切れ勝ちとする
+                    IsWin = true;
+                    SetResultPanel();
+                }
+            }
+            else {
+                if (LocalEngineProcess == null)
+                    return;
+
+                if (GUIManager.Winner != SColor.NB)
+                    LocalEngineProcess.QuitEngine();
+
+                // エンジンの手番であるか
+                if (GUIManager.Position.sideToMove == GUIManager.MyColor)
+                    return;
+
+                if (LocalEngineProcess.ReadyOk && !LocalEngineProcess.Thinking) {
+                    Think();
+                    while (LocalEngineProcess.BestMove == Move.NONE) ;
+                    DoMove(LocalEngineProcess.BestMove);
+
+                    LocalEngineProcess.BestMove = Move.NONE;
+                    LocalEngineProcess.Thinking = false;
+                }
             }
         }
 
-        public void StartGame(SColor us, string enginePath = null)
-        {
+        public void StartGame(SColor us, string enginePath = null) {
             SceneCamera.transform.rotation = Quaternion.Euler(0, 0, us == SColor.WHITE ? 180 : 0);
             GUIManager.gameObject.SetActive(true);
             GUIManager.Init();
             GUIManager.NewGame(us);
-            MyColor = us;
-            
-            if (enginePath == null)
-            {
-                localEngineProcess = null;
+
+            if (enginePath == null) {
+                LocalEngineProcess = null;
             }
-            else
-            {
-                localEngineProcess = new LocalEngineProcess();
-                localEngineProcess.RunEngine(enginePath);
+            else {
+                LocalEngineProcess = new LocalEngineProcess();
+                LocalEngineProcess.RunEngine(enginePath);
             }
         }
 
-        void DoMove(Move m)
-        {
+        void DoMove(Move m) {
             // 合法手の判定するべき
             GUIManager.DoMove(m);
         }
 
-        void Think()
-        {
-            if (localEngineProcess != null)
-                localEngineProcess.Think(GUIManager.ToPositionCommand());
+        void Think() {
+            if (LocalEngineProcess != null)
+                LocalEngineProcess.Think(GUIManager.ToPositionCommand());
         }
 
-        void LeaveRoom(bool isWin)
-        {
-            this.isWin = isWin;
+        void SetResultPanel() {
+            ResultPanel.GetComponentInChildren<TextMeshProUGUI>().text
+                = string.Format($"{GUIManager.Position.gamePly}手にて\nあなたの{(IsWin ? "勝ち" : "負け")}");
+            ResultPanel.SetActive(true);
+        }
+
+        public void LeaveRoom() {
             PhotonNetwork.LeaveRoom();
         }
 
-        public override void OnLeftRoom()
-        {
+        public void LoadScene() {
+            SceneManager.LoadScene("TitleScene");
+        }
+
+        public override void OnLeftRoom() {
             SceneManager.sceneLoaded += TitleSceneLoaded;
             SceneManager.LoadScene("TitleScene");
         }
 
-        private void TitleSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            var playerDataManager = GameObject.FindWithTag("DataManager").GetComponent<PlayerData.PlayerDataManager>();
-            playerDataManager.UpdateData(Misc.EloRating.Update(myRating, opponentRating, isWin), isWin);
+        void TitleSceneLoaded(Scene scene, LoadSceneMode mode) {
+            var dataManager = GameObject.FindWithTag("DataManager").GetComponent<PlayerData.PlayerDataManager>();
+            dataManager.EntryTask((MyRating, OpponentRating, IsWin));
             SceneManager.sceneLoaded -= TitleSceneLoaded;
         }
     }
