@@ -9,7 +9,7 @@ using SColor = Assets.Scripts.Shogi.Color;
 namespace Assets.Scripts.GameServer {
     public class GameServer : MonoBehaviourPunCallbacks {
         [SerializeField]
-        GameObject GUIObject = default;
+        GUIManager GUIManager = default;
 
         [SerializeField]
         GameObject ResultPanel = default;
@@ -17,18 +17,12 @@ namespace Assets.Scripts.GameServer {
         [SerializeField]
         Camera SceneCamera = default;
 
-        GUIManager GUIManager { set; get; }
-
         public static bool IsOnline { get { return PhotonNetwork.InRoom; } }
 
         LocalEngineProcess LocalEngineProcess = null;
 
         bool IsWin;
         double MyRating, OpponentRating;
-
-        void Awake() {
-            GUIManager = GUIObject.GetComponent<GUIManager>();
-        }
 
         void Start() {
             var us = !IsOnline ? SColor.NB
@@ -48,7 +42,6 @@ namespace Assets.Scripts.GameServer {
         }
 
         void Update() {
-
             if (IsOnline) {
                 if (GUIManager.Winner != SColor.NB) {
                     //LeaveRoom(GUIManager.Winner == GUIManager.MyColor);
@@ -76,7 +69,7 @@ namespace Assets.Scripts.GameServer {
                 if (LocalEngineProcess.ReadyOk && !LocalEngineProcess.Thinking) {
                     Think();
                     while (LocalEngineProcess.BestMove == Move.NONE) ;
-                    DoMove(LocalEngineProcess.BestMove);
+                    GUIManager.DoMove(LocalEngineProcess.BestMove);
 
                     LocalEngineProcess.BestMove = Move.NONE;
                     LocalEngineProcess.Thinking = false;
@@ -97,11 +90,6 @@ namespace Assets.Scripts.GameServer {
                 LocalEngineProcess = new LocalEngineProcess();
                 LocalEngineProcess.RunEngine(enginePath);
             }
-        }
-
-        void DoMove(Move m) {
-            // 合法手の判定するべき
-            GUIManager.DoMove(m);
         }
 
         void Think() {

@@ -1755,6 +1755,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad4efebd9fd2b094db73b4ec71f6992e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  StartEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1043114210}
+        m_TargetAssemblyTypeName: Assets.Scripts.GameServer.GUIManager, Assembly-CSharp
+        m_MethodName: set_UpdateIgnore
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+  DestroyEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1043114210}
+        m_TargetAssemblyTypeName: Assets.Scripts.GameServer.GUIManager, Assembly-CSharp
+        m_MethodName: set_UpdateIgnore
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &162813941
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2214,7 +2244,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38f6fb1bf3dc50646902ad0d501e0bb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GUIObject: {fileID: 1043114208}
+  GUIManager: {fileID: 1043114210}
   ResultPanel: {fileID: 1913191351}
   SceneCamera: {fileID: 1175884404}
 --- !u!1 &238278911

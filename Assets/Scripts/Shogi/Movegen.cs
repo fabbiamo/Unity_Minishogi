@@ -123,7 +123,7 @@ namespace Assets.Scripts.Shogi
         {
             var sb = new StringBuilder();
             Move[] moves = new Move[(int)Move.MAX_MOVES];
-            int endIndex = MoveGen.LegalAll(pos, moves, 0);
+            int endIndex = LegalAll(pos, moves, 0);
 
             for (int i = 0; i < endIndex; ++i)
                 sb.Append(moves[i].Pretty() + " ");

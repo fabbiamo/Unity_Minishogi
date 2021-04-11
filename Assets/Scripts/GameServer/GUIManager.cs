@@ -224,7 +224,9 @@ namespace Assets.Scripts.GameServer {
             var from = move.From();
 
             if (move.IsSpecial()) {
-                Winner = us.Not();
+                if (move == Move.RESIGN)
+                    Winner = us.Not();
+
                 ScreenControl.Interactable(MyColor == SColor.NB, true);
                 return;
             }
@@ -252,6 +254,7 @@ namespace Assets.Scripts.GameServer {
             }
 
             BoardManager.DoMove(move);
+            EndGame();
         }
 
         void UndoMove(Move move, bool overwrite = true) {
@@ -294,6 +297,20 @@ namespace Assets.Scripts.GameServer {
             }
 
             BoardManager.UnDoMove();
+        }
+
+        void EndGame() {
+            Move[] moves = new Move[(int)Move.MAX_MOVES];
+            if (MoveGen.LegalAll(Position, moves, 0) == 0) {
+                Winner = Position.sideToMove.Not();
+                DoMove(Move.MATED);
+            }
+
+            var rs = Position.IsRepetition();
+            if (rs != RepetitionState.NONE) {
+                Winner = SColor.WHITE;
+                DoMove(rs == RepetitionState.WIN ? Move.REPETITION_WIN : Move.REPETITION_LOSE);
+            }
         }
 
         void EntryItem(Move move) {

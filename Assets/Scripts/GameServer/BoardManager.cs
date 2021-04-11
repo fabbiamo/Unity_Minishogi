@@ -1,20 +1,6 @@
 ﻿using Assets.Scripts.Shogi;
 
 namespace Assets.Scripts.GameServer {
-    enum MatchingState {
-        Start,
-        Playing,
-        Pause,
-        Fin,
-    };
-
-    public enum GameResult {
-        None,
-        BlackWin,
-        WhiteWin,
-        Draw,
-    };
-
     public class BoardManager {
         /// <summary>
         /// 局面情報
@@ -61,36 +47,6 @@ namespace Assets.Scripts.GameServer {
                 return true;
 
             return pc.PieceColor() == Position.sideToMove.Not();
-        }
-
-        public GameResult IsEndGame() {
-            Move[] moves = new Move[(int)Move.MAX_MOVES];
-            if (MoveGen.LegalAll(Position, moves, 0) == 0) {
-                if (Position.sideToMove == Color.BLACK)
-                    return GameResult.WhiteWin;
-                else
-                    return GameResult.BlackWin;
-            }
-
-            switch (Position.IsRepetition()) {
-            case RepetitionState.WIN: {
-                    if (Position.sideToMove == Color.BLACK)
-                        return GameResult.BlackWin;
-                    else
-                        return GameResult.WhiteWin;
-                }
-
-            case RepetitionState.LOSE: {
-                    if (Position.sideToMove == Color.BLACK)
-                        return GameResult.WhiteWin;
-                    else
-                        return GameResult.BlackWin;
-                }
-
-            case RepetitionState.NONE:
-            default:
-                return GameResult.None;
-            }
         }
     }
 }

@@ -1,8 +1,15 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.GameServer {
-	public class DropdownScrollControl : MonoBehaviour {
+    public class DropdownScrollControl : MonoBehaviour {
+		[SerializeField]
+		UnityEvent StartEvent = default;
+
+		[SerializeField]
+		UnityEvent DestroyEvent = default;
+
 		ScrollRect Sr;
 
 		void Awake() {
@@ -10,6 +17,11 @@ namespace Assets.Scripts.GameServer {
 		}
 
 		void Start() {
+			if (gameObject.name == "Dropdown List") {
+				Debug.Log("Awake");
+				StartEvent.Invoke();
+			}
+
 			if (Sr == null)
 				return;
 
@@ -24,5 +36,10 @@ namespace Assets.Scripts.GameServer {
 			var scrollRatio = (cellHeight * dropdown.value) / areaHeight;
 			Sr.verticalNormalizedPosition = 1.0f - Mathf.Clamp(scrollRatio, 0.0f, 1.0f);
 		}
-	}
+
+        void OnDestroy() {
+			if (gameObject.name == "Dropdown List")
+				DestroyEvent.Invoke();
+		}
+    }
 }

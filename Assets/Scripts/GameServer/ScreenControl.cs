@@ -29,14 +29,14 @@ namespace Assets.Scripts.GameServer {
 
 		public int DropdownValue { get { return Dropdown.value; } }
 
-		private void Awake() {
+		void Awake() {
 			StartingPositionButton.onClick.AddListener(() => OnClickPositionButton(0));
 			PreviousPositionButton.onClick.AddListener(() => OnClickPositionButton(1));
 			NextPositionButton.onClick.AddListener(() => OnClickPositionButton(2));
 			LastPositionButton.onClick.AddListener(() => OnClickPositionButton(3));
 		}
 
-		public void Clear() {
+        public void Clear() {
 			Dropdown.options.Clear();
 			Dropdown.options.Add(new Dropdown.OptionData { text = "     初期局面" });
 			Dropdown.RefreshShownValue();
