@@ -855,7 +855,7 @@ GameObject:
   - component: {fileID: 520957552}
   m_Layer: 0
   m_Name: Matchmaking
-  m_TagString: Matchmaking
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3339,7 +3339,7 @@ GameObject:
   - component: {fileID: 1260571490}
   m_Layer: 0
   m_Name: Player Data Manager
-  m_TagString: Untagged
+  m_TagString: DataManager
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
